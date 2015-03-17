@@ -7,40 +7,108 @@
     <script src="https://maps.googleapis.com/maps/api/js"></script>
     <script src="bootstrap.min.js"></script>
     <link rel="stylesheet" href="bootstrap.min.css"/>
+    <link rel="stylesheet" href="styles.css" />
     <script>
     var titles = [];
     var images = [];
     var markers = [];
     var positions = [];
+    var details = {};
     var map;
+    function infoBox(x) {
+        $('#title-text').html(x.replace(/_/g,' '));
+        str = details[x];
+        $('#more-text').html('Released in '+str.substring(0,4)+', '+x.replace(/_/g,' ')+' takes place near '+str.substring(5)+'.');
+    }
           function initialize() {
+          $('#title-text').html("Click on a movie for more information");
+          $('#more-text').html('');
           var mapCanvas = document.getElementById('map-canvas');
           var mapOptions = {
             center: new google.maps.LatLng(42.4083, -71.1210),
             zoom: 3,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            scrollwheel: false,
+            disableDefaultUI: true
           }
           positions.push(new google.maps.LatLng(14.5256, -75.8183));
           titles.push("The_Little_Mermaid");
+          details["The_Little_Mermaid"] = "1989:The Carribean";
+
           positions.push(new google.maps.LatLng(64, -150));
           titles.push("Brother_Bear");
+          details["Brother_Bear"] = "2003:Alaska";
+
           positions.push(new google.maps.LatLng(-18.2861, 147.7000));
           titles.push("Finding_Nemo");
+          details["Finding_Nemo"] = "2003:The Great Barrier Reef";
+
           positions.push(new google.maps.LatLng(50, -85));
           titles.push("Bambi");
+          details["Bambi"] = "1942:Ontario, Canada";
+
           positions.push(new google.maps.LatLng(46, -90));
           titles.push("Meet_The_Robinsons");
+          details["Meet_The_Robinsons"] = "2007:The Carribean";
+
           positions.push(new google.maps.LatLng(49.5, -87.5));
           titles.push("The_Fox_And_The_Hound");
+          details["The_Fox_And_The_Hound"] = "1981:Upper North America";
+
           positions.push(new google.maps.LatLng(40.0, -89.0));
           titles.push("Chicken_Little"); 
+          details["Chicken_Little"] = "2005:The Midwest";
+
+          positions.push(new google.maps.LatLng(42.4083, -71.1210));
+          titles.push("Lady_And_The_Tramp");
+          details["Lady_And_The_Tramp"] = "1995:New England";
+
+          positions.push(new google.maps.LatLng(26.2767, -98.7970));
+          titles.push("A_Bug's_Life");
+          details["A_Bug's_Life"] = "1998:The Mexico/Texas Border";
+
+          positions.push(new google.maps.LatLng(36.5000, -78.0000));
+          titles.push("Pocahontas");
+          details["Pocahontas"] = "1995:Virginia";
+
+          positions.push(new google.maps.LatLng(41.8369, -87.6847));
+          titles.push("The_Incredibles");
+          details["The_Incredibles"] = "2004:Chicago";
+
+          positions.push(new google.maps.LatLng(40.5000, -82.5000));
+          titles.push("Toy_Story");
+          details["Toy_Story"] = "1995:Ohio";
+
+          positions.push(new google.maps.LatLng(34.0500, -118.2500));
+          titles.push("Bolt");
+          details["Bolt"] = "2008:Hollywood";
+
+          positions.push(new google.maps.LatLng(34.0000, -112.0000));
+          titles.push("Cars");
+          details["Cars"] = "2006:Arizona";
+
+          positions.push(new google.maps.LatLng(21.3114, -157.7964));
+          titles.push("Lilo_And_Stitch");
+          details["Lilo_And_Stitch"] = "2002:Hawaii";
+
+          positions.push(new google.maps.LatLng(29.9500, -90.0067));
+          titles.push("The_Princess_And_The_Frog");
+          details["The_Princess_And_The_Frog"] = "2009:New Orleans";
+
+          positions.push(new google.maps.LatLng(29.9500, -91.0067));
+          titles.push("The_Rescuers");
+          details["The_Rescuers"] = "1977:The Bayou";
+
+          positions.push(new google.maps.LatLng(27.1000, -81.7000));
+          titles.push("Dumbo");
+          details["Dumbo"] = "1941:Florida";
 
           map = new google.maps.Map(mapCanvas, mapOptions);
 
           for (var i = 0; i < titles.length; i++) {
             var film = titles[i];
             images.push('images/'+film+'.png');
-            var image = {url: images[i], scaledSize: new google.maps.Size(25,25)};
+            var image = {url: images[i], scaledSize: new google.maps.Size(30,30)};
             marker = new google.maps.Marker({
               position: positions[i],
               map: map,
@@ -55,8 +123,7 @@
               this['infowindow'].close(map, this);
             });
             google.maps.event.addListener(marker, 'click', function() {
-              map.setZoom(8);
-              map.setCenter(this.position);
+              filmSearch(this.title);
             });
             markers.push(marker);
           } 
@@ -68,39 +135,63 @@
             if (x == titles[i]) {
               map.setZoom(8);
               map.setCenter(positions[i]);
-              markers[i].image = {url: images[i], scaledSize: new google.maps.Size(75,75)};
+              var marker = markers[i];
+              marker.setIcon({url: marker.icon.url, scaledSize: new google.maps.Size(200,200)});
             }
-          } 
+            else {
+              markers[i].setIcon({url: markers[i].icon.url, scaledSize: new google.maps.Size(25,25)});
+            }
+          }
+          infoBox(x.replace(/ /g,'_'));
         }
+      function reset() {
+          for (var i = 0; i < titles.length; i++) {
+            markers[i].setIcon({url: markers[i].icon.url, scaledSize: new google.maps.Size(25,25)});
+          }
+          $('#title-text').html("Click on a movie for more information");
+          $('#more-text').html('');
+          map.setZoom(3);
+          var def_pos = new google.maps.LatLng(42.4083, -71.1210)
+          map.setCenter(def_pos);
+      }
     </script>
   </head>
   <body>
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1 search">
       <ul class="nav navbar-nav">
-        <li><a onclick="initialize()">The World of Disney</a></li>
+        <li><a onclick="reset()">The World of Disney</a></li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Movies<span class="caret"></span></a>
           <ul class="dropdown-menu page-scroll" role="menu">
+            <li><a onclick="filmSearch('A_Bug's_Life)">A Bug's Life</a></li>
             <li><a onclick="filmSearch('Bambi')">Bambi</a></li>
+            <li><a onclick="filmSearch('Bolt')">Bolt</a></li>
             <li><a onclick="filmSearch('Brother_Bear')">Brother Bear</a></li>
+            <li><a onclick="filmSearch('Cars')">Cars</a></li>
             <li><a onclick="filmSearch('Chicken_Little')">Chicken Little</a></li>
+            <li><a onclick="filmSearch('Dumbo')">Dumbo</a></li>
             <li><a onclick="filmSearch('Finding_Nemo')">Finding Nemo</a></li>
+            <li><a onclick="filmSearch('The_Incredibles')">The Incredibles</a></li>
+            <li><a onclick="filmSearch('Lady_And_The_Tramp')">Lady And The Tramp</a></li>
+            <li><a onclick="filmSearch('Lilo_And_Stitch')">Lilo And Stitch</a></li>
             <li><a onclick="filmSearch('The_Little_Mermaid')">The Little Mermaid</a></li>
             <li><a onclick="filmSearch('Meet_The_Robinsons')">Meet The Robinsons</a></li>
+            <li><a onclick="filmSearch('Pocahontas')">Pocahontas</a></li>
+            <li><a onclick="filmSearch('The_Princess_And_The_Frog')">The Princess And The Frog</a></li>
+            <li><a onclick="filmSearch('The_Rescuers')">The Rescuers</a></li>
+            <li><a onclick="filmSearch('Toy_Story')">Toy Story</a></li>
           </ul>
       </ul>
     </div>
+    <div id="text-container"><h2 id="title-text"></h2><h5 id="more-text"></h5></div>
     <div id="map-canvas"></div>
     <script>
         var wid = $(window).width();
         var ht = $(window).height();
         $('#map-canvas').css('width', wid+'px');
         $('#map-canvas').css('height', ht+'px');
-        $('#search').css('z-index', 100);
-        $('#search').css('position', 'fixed');
-        $('#search').css('font-family', 'open sans');
-        $('body').css('overflow-y', 'hidden');
-        $('a').css('cursor', 'pointer');
+        $('#text-container').css('width', wid+'px');
+        $('#text-container').css('height', ht/7+'px');
     </script>
   </body>
 </html>
